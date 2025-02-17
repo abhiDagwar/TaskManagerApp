@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		408932692D5E1A930059563E /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 408932682D5E1A930059563E /* FirebaseAuth */; };
+		4089326B2D5E1A930059563E /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 4089326A2D5E1A930059563E /* FirebaseFirestore */; };
+		4089326E2D5E1AC90059563E /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4089326D2D5E1AC90059563E /* Alamofire */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		4089324C2D5E0CA20059563E /* TaskManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TaskManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +29,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4089326E2D5E1AC90059563E /* Alamofire in Frameworks */,
+				408932692D5E1A930059563E /* FirebaseAuth in Frameworks */,
+				4089326B2D5E1A930059563E /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +42,7 @@
 			isa = PBXGroup;
 			children = (
 				4089324E2D5E0CA20059563E /* TaskManager */,
+				408932672D5E1A930059563E /* Frameworks */,
 				4089324D2D5E0CA20059563E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +53,13 @@
 				4089324C2D5E0CA20059563E /* TaskManager.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		408932672D5E1A930059563E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -65,6 +82,9 @@
 			);
 			name = TaskManager;
 			packageProductDependencies = (
+				408932682D5E1A930059563E /* FirebaseAuth */,
+				4089326A2D5E1A930059563E /* FirebaseFirestore */,
+				4089326D2D5E1AC90059563E /* Alamofire */,
 			);
 			productName = TaskManager;
 			productReference = 4089324C2D5E0CA20059563E /* TaskManager.app */;
@@ -94,6 +114,10 @@
 			);
 			mainGroup = 408932432D5E0CA20059563E;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				408932662D5E0F2F0059563E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				4089326C2D5E1AC90059563E /* XCRemoteSwiftPackageReference "Alamofire" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4089324D2D5E0CA20059563E /* Products */;
 			projectDirPath = "";
@@ -322,6 +346,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		408932662D5E0F2F0059563E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.8.1;
+			};
+		};
+		4089326C2D5E1AC90059563E /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		408932682D5E1A930059563E /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 408932662D5E0F2F0059563E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		4089326A2D5E1A930059563E /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 408932662D5E0F2F0059563E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		4089326D2D5E1AC90059563E /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4089326C2D5E1AC90059563E /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 408932442D5E0CA20059563E /* Project object */;
 }

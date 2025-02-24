@@ -1,13 +1,13 @@
 //
-//  LoginView.swift
+//  SignupView.swift
 //  TaskManager
 //
-//  Created by Abhishek G on 17/02/25.
+//  Created by Abhishek G on 24/02/25.
 //
 
 import SwiftUI
 
-struct LoginView: View {
+struct SignupView: View {
     @EnvironmentObject var authService: AuthService
     @State private var email = ""
     @State private var password = ""
@@ -17,17 +17,16 @@ struct LoginView: View {
             TextField("Email", text: $email)
                 .textInputAutocapitalization(.never)
             SecureField("Password", text: $password)
-            Button("Login") {
-                authService.signIn(email: email, password: password) { success in
+            Button("Sign Up") {
+                authService.signUp(email: email, password: password) { success in
                     // Handle success/failure
                 }
             }
-            //NavigationLink("Create Account", destination: SignupView())
         }
         .padding()
     }
 }
 
 #Preview {
-    LoginView()
+    SignupView()
 }

@@ -11,8 +11,11 @@ import SwiftUI
 struct TaskManagerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     var body: some Scene {
+        // Initialize AuthService and inject it globally
+        let authService = AuthService.shared
         WindowGroup {
             ContentView()
+                .environmentObject(authService) // ⚠️ Critical Fix Here
         }
     }
 }

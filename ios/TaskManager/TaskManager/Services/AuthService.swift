@@ -39,7 +39,16 @@ class AuthService: ObservableObject {
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
             if let error = error {
                 // If an error occurs, store the error message and return `false`
-                self?.errorMessage = error.localizedDescription
+                switch AuthErrorCode(rawValue: error._code) {
+                  case .emailAlreadyInUse:
+                    self?.errorMessage = "Email already in use."
+                  case .weakPassword:
+                    self?.errorMessage = "Password must be at least 6 characters."
+                  case .networkError:
+                    self?.errorMessage = "Network error. Check your connection."
+                  default:
+                    self?.errorMessage = "Signup failed. Please try again."
+                  }
                 completion(false)
             } else {
                 // If sign-up is successful, return `true`

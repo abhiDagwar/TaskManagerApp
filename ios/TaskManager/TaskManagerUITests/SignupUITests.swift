@@ -35,30 +35,120 @@ final class SignupUITests: XCTestCase {
 
     // Test password mismatch
     func testPasswordMismatch() {
-      let passwordField = app.secureTextFields["Password"]
-      let reEnterPasswordField = app.secureTextFields["Re-Enter Password"]
-      passwordField.tap()
-      passwordField.typeText("Password@123")
-      reEnterPasswordField.tap()
-      reEnterPasswordField.typeText("wrongpass")
-      XCTAssert(app.staticTexts["Passwords do not match"].exists)
+        let emailField = app.textFields["Email"]
+        let passwordField = app.secureTextFields["Password"]
+        let reEnterPasswordField = app.secureTextFields["Re-Enter Password"]
+
+        // Enter valid email id
+        emailField.tap()
+        emailField.typeText("test@example.com")
+        
+        // Set clipboard value
+        UIPasteboard.general.string = "Password@123"
+
+        // Tap password field and paste text
+        passwordField.tap()
+        passwordField.doubleTap()
+        app.menuItems["Paste"].tap()
+
+        // Set mismatched password in clipboard
+        UIPasteboard.general.string = "Password@1234"
+
+        // Tap re-enter password field and paste text
+        reEnterPasswordField.tap()
+        reEnterPasswordField.doubleTap()
+        app.menuItems["Paste"].tap()
+
+        // Tap "Sign Up" button
+        app.buttons["Sign Up"].tap()
+
+        // Verify error message
+        XCTAssert(app.staticTexts["Passwords do not match"].exists)
     }
 
     // Test successful signup
     func testSuccessfulSignup() {
-      let emailField = app.textFields["Email"]
-      let passwordField = app.secureTextFields["Password"]
-      let reEnterPasswordField = app.secureTextFields["Re-Enter Password"]
-      
-      emailField.tap()
-      emailField.typeText("test@example.com")
-      passwordField.tap()
-      passwordField.typeText("Password@123")
-      reEnterPasswordField.tap()
-      reEnterPasswordField.typeText("Password@123")
-      app.buttons["Sign Up"].tap()
-      
-      // Verify navigation to another screen (e.g., Task List)
-      XCTAssert(app.navigationBars["Tasks"].waitForExistence(timeout: 10))
+        let emailField = app.textFields["Email"]
+        let passwordField = app.secureTextFields["Password"]
+        let reEnterPasswordField = app.secureTextFields["Re-Enter Password"]
+        let successAlert = app.alerts["Success!"]
+        let okButton = successAlert.buttons["OK"]
+        let loginScreenTitle = app.navigationBars["Login"] // Ensure correct title for login screen
+        
+        let uniqueEmail = "test+\(UUID().uuidString)@example.com" // Generate unique email
+        
+        emailField.tap()
+        emailField.typeText(uniqueEmail)
+        
+        // Set clipboard value
+        UIPasteboard.general.string = "Password@123"
+        
+        app.tap()
+        
+        // Tap password field and paste text
+        passwordField.tap()
+        passwordField.doubleTap()
+        app.menuItems["Paste"].tap()
+        
+        // Set re-entered password in clipboard
+        UIPasteboard.general.string = "Password@123"
+        
+        // Tap re-enter password field and paste text
+        reEnterPasswordField.tap()
+        reEnterPasswordField.doubleTap()
+        app.menuItems["Paste"].tap()
+        
+        // Tap Sign Up button
+        app.buttons["Sign Up"].tap()
+        
+        // Verify success alert appears
+        XCTAssert(successAlert.waitForExistence(timeout: 5))
+        
+        // Tap OK button to dismiss alert
+        okButton.tap()
+        
+        // Verify we navigated back to login screen
+        XCTAssert(loginScreenTitle.waitForExistence(timeout: 5))
     }
+    
+    func testExistingEmailSignup() {
+        let emailField = app.textFields["Email"]
+        let passwordField = app.secureTextFields["Password"]
+        let reEnterPasswordField = app.secureTextFields["Re-Enter Password"]
+        let failedAlert = app.alerts["Signup Failed"]
+        let alertMessage = failedAlert.staticTexts["Email already in use."] // Check alert message
+        let okButton = failedAlert.buttons["OK"]
+
+        let existingEmail = "existinguser@example.com" // Use an already registered email
+
+        emailField.tap()
+        emailField.typeText(existingEmail)
+        
+        // Set clipboard value
+        UIPasteboard.general.string = "Password@123"
+        
+        // Tap password field and paste text
+        passwordField.tap()
+        passwordField.doubleTap()
+        app.menuItems["Paste"].tap()
+        
+        UIPasteboard.general.string = "Password@123"
+
+        // Tap re-enter password field and paste text
+        reEnterPasswordField.tap()
+        reEnterPasswordField.doubleTap()
+        app.menuItems["Paste"].tap()
+        
+        app.buttons["Sign Up"].tap()
+
+        // Verify failed alert appears
+        XCTAssert(failedAlert.waitForExistence(timeout: 5))
+        
+        // Verify alert message
+        XCTAssert(alertMessage.exists)
+        
+        // Tap OK button to dismiss alert
+        okButton.tap()
+    }
+    
 }

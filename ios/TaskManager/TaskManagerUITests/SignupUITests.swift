@@ -71,8 +71,12 @@ final class SignupUITests: XCTestCase {
         let emailField = app.textFields["Email"]
         let passwordField = app.secureTextFields["Password"]
         let reEnterPasswordField = app.secureTextFields["Re-Enter Password"]
-        let successAlert = app.alerts["Success!"]
-        let okButton = successAlert.buttons["OK"]
+        
+        // Custom alert labels
+        let alertTitle = app.staticTexts["Success!"]
+        let alertMessage = app.staticTexts["Account created successfully."]
+        let okButton = app.buttons["OK"]
+        
         let loginScreenTitle = app.navigationBars["Login"] // Ensure correct title for login screen
         
         let uniqueEmail = "test+\(UUID().uuidString)@example.com" // Generate unique email
@@ -101,11 +105,20 @@ final class SignupUITests: XCTestCase {
         // Tap Sign Up button
         app.buttons["Sign Up"].tap()
         
-        // Verify success alert appears
-        XCTAssert(successAlert.waitForExistence(timeout: 5))
+        // Wait for the custom alert to appear
+        let alertExists = alertTitle.waitForExistence(timeout: 10)
+        XCTAssertTrue(alertExists, "Custom alert did not appear")
         
-        // Tap OK button to dismiss alert
+        // Verify title & message of alert
+        XCTAssertTrue(alertTitle.exists, "Alert title does not exist")
+        XCTAssertTrue(alertMessage.exists, "Alert message does not exist")
+        
+        // Tap OK button to dismiss
+        XCTAssertTrue(okButton.exists, "OK button does not exist")
         okButton.tap()
+        
+        // Ensure the alert disappears
+        XCTAssertFalse(alertTitle.exists, "Custom alert did not dismiss")
         
         // Verify we navigated back to login screen
         XCTAssert(loginScreenTitle.waitForExistence(timeout: 5))
@@ -115,12 +128,14 @@ final class SignupUITests: XCTestCase {
         let emailField = app.textFields["Email"]
         let passwordField = app.secureTextFields["Password"]
         let reEnterPasswordField = app.secureTextFields["Re-Enter Password"]
-        let failedAlert = app.alerts["Signup Failed"]
-        let alertMessage = failedAlert.staticTexts["Email already in use."] // Check alert message
-        let okButton = failedAlert.buttons["OK"]
-
+        
+        // Custom alert labels
+        let alertTitle = app.staticTexts["Signup Failed"]
+        let alertMessage = app.staticTexts["Email already in use."]
+        let okButton = app.buttons["OK"]
+        
         let existingEmail = "existinguser@example.com" // Use an already registered email
-
+        
         emailField.tap()
         emailField.typeText(existingEmail)
         
@@ -133,22 +148,28 @@ final class SignupUITests: XCTestCase {
         app.menuItems["Paste"].tap()
         
         UIPasteboard.general.string = "Password@123"
-
+        
         // Tap re-enter password field and paste text
         reEnterPasswordField.tap()
         reEnterPasswordField.doubleTap()
         app.menuItems["Paste"].tap()
         
         app.buttons["Sign Up"].tap()
-
-        // Verify failed alert appears
-        XCTAssert(failedAlert.waitForExistence(timeout: 5))
         
-        // Verify alert message
-        XCTAssert(alertMessage.exists)
+        // Wait for the custom alert to appear
+        let alertExists = alertTitle.waitForExistence(timeout: 10)
+        XCTAssertTrue(alertExists, "Custom alert did not appear")
         
-        // Tap OK button to dismiss alert
+        // Verify title & message of alert
+        XCTAssertTrue(alertTitle.exists, "Alert title does not exist")
+        XCTAssertTrue(alertMessage.exists, "Alert message does not exist")
+        
+        // Tap OK button to dismiss
+        XCTAssertTrue(okButton.exists, "OK button does not exist")
         okButton.tap()
+        
+        // Ensure the alert disappears
+        XCTAssertFalse(alertTitle.exists, "Custom alert did not dismiss")
     }
     
 }

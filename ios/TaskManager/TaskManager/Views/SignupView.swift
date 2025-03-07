@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SignupView: View {
     
+    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var authService: AuthService
     @Environment(\.dismiss) var dismiss
     @State private var email = ""
@@ -26,65 +27,132 @@ struct SignupView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                VStack(spacing: 20) {
-                    // Email Field
-                    VStack(alignment: .leading) {
-                        TextField("Email", text: $email)
-                            .textInputAutocapitalization(.never)
-                        // For email field
-                            .onChange(of: email) {
-                                emailErrorMessage = ""
-                            }
-                        Text(emailErrorMessage)
-                            .errorMessageStyle()
-                    }
+                // Background
+                Color("BackgroundColor").ignoresSafeArea()
+
+                VStack {
+                    Spacer() // Push content to the center
                     
-                    // Password Field
-                    VStack(alignment: .leading) {
-                        SecureField("Password", text: $password)
-                        // For password field
-                            .onChange(of: password) {
-                                passwordErrorMessage = ""
-                                validateReEnterPassword()
+                    ScrollView {
+                        VStack(spacing: 30) {
+                            // Header
+                            VStack {
+                                Image(systemName: "person.crop.circle.badge.plus")
+                                    .font(.system(size: 60))
+                                    .foregroundColor(Color("PrimaryColor"))
+                                
+                                Text("Create Account")
+                                    .font(.largeTitle.bold())
+                                    .foregroundColor(Color("TextPrimary"))
                             }
-                        Text(passwordErrorMessage)
-                            .errorMessageStyle()
-                    }
-                    
-                    // Re-Enter Password Field
-                    VStack(alignment: .leading) {
-                        SecureField("Re-Enter Password", text: $reEnterPassword)
-                            .onChange(of: password) {
-                                validateReEnterPassword()
+                            
+                            // Form
+                            VStack(spacing: 20) {
+                                // Email Field
+                                VStack(alignment: .leading) {
+                                    CustomTextField(
+                                        title: "Email",
+                                        icon: "envelope",
+                                        text: $email
+                                    )
+                                    .textInputAutocapitalization(.never)
+                                    .onChange(of: email) {
+                                        emailErrorMessage = ""
+                                    }
+                                    if !emailErrorMessage.isEmpty {
+                                        ErrorMessage(text: emailErrorMessage)
+                                    }
+                                }
+                                
+                                // Password Field
+                                VStack(alignment: .leading) {
+                                    CustomTextField(
+                                        title: "Password",
+                                        icon: "lock",
+                                        text: $password,
+                                        isSecure: true
+                                    )
+                                    .onChange(of: password) {
+                                        passwordErrorMessage = ""
+                                        validateReEnterPassword()
+                                    }
+                                    
+                                    if !passwordErrorMessage.isEmpty {
+                                        ErrorMessage(text: passwordErrorMessage)
+                                    }
+                                }
+                                
+                                // Re-Enter Password Field
+                                VStack(alignment: .leading) {
+                                    CustomTextField(
+                                        title: "Re-Enter Password",
+                                        icon: "lock.fill",
+                                        text: $reEnterPassword,
+                                        isSecure: true
+                                    )
+                                    .onChange(of: password) {
+                                        validateReEnterPassword()
+                                    }
+                                    if !reEnterPasswordErrorMessage.isEmpty {
+                                        ErrorMessage(text: reEnterPasswordErrorMessage)
+                                    }
+                                }
+                                
+                                // Sign Up Button
+                                CustomButton(
+                                    title: "Sign Up",
+                                    action: handleSignup,
+                                    isLoading: isLoading
+                                )
+                                .disabled(isLoading)
+                                
+                                // Login Link
+                                HStack {
+                                    Text("Already have an account?")
+                                        .foregroundColor(Color("TextSecondary"))
+                                    
+                                    Button("Log In") {
+                                        dismiss()
+                                    }
+                                    .foregroundColor(Color("PrimaryColor"))
+                                }
                             }
-                        Text(reEnterPasswordErrorMessage)
-                            .errorMessageStyle()
-                    }
-                    
-                    // Sign Up Button
-                    Button("Sign Up") {
-                        handleSignup()
-                    }
-                    .disabled(isLoading)
-                }
-                .padding()
-                .navigationTitle("Sign Up")
-                .alert(alertTitle, isPresented: $showAlert) {
-                    Button("OK") {
-                        if isSignupSuccessful {
-                            dismiss() // Return to login screen on success
+                            .padding()
                         }
                     }
-                } message: {
-                    Text(alertMessage)
+
+                    Spacer() // Push content to the center
                 }
+                
+                // Alert Overlay
+                if showAlert {
+                    Color.black.opacity(0.4).ignoresSafeArea()
+                    CustomAlertView(
+                        title: alertTitle,
+                        message: alertMessage,
+                        primaryButtonTitle: "OK",
+                        primaryAction: {
+                            if isSignupSuccessful {
+                                dismiss()
+                            }
+                            showAlert = false
+                        }
+                    )
+                    .transition(.scale)
+                }
+
                 // Loading Overlay
                 if isLoading {
-                    ProgressView()
-                        .scaleEffect(2)
-                        .padding()
-                        .background(.thinMaterial)
-                        .cornerRadius(10)
+                    VStack {
+                        ProgressView()
+                            .scaleEffect(2)
+                            .padding()
+                            .background(.thinMaterial)
+                            .cornerRadius(10)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black.opacity(0.3))
+                    .ignoresSafeArea()
                 }
             }
         }
@@ -92,21 +160,18 @@ struct SignupView: View {
     
     // MARK: - Validation
     private func validateForm() {
-        // Email Validation
         if Validation.isFieldEmpty(email) {
             emailErrorMessage = "Email is required"
         } else if !Validation.isValidEmail(email) {
             emailErrorMessage = "Invalid email format"
         }
         
-        // Password Validation
         if Validation.isFieldEmpty(password) {
             passwordErrorMessage = "Password is required"
         } else if !Validation.isValidPassword(password) {
             passwordErrorMessage = "Invalid password format"
         }
         
-        // Re-Enter Password Validation
         validateReEnterPassword()
     }
     
@@ -118,7 +183,6 @@ struct SignupView: View {
         }
     }
     
-    // Updated signup logic
     private func handleSignup() {
         validateForm()
         guard emailErrorMessage.isEmpty,
@@ -129,23 +193,20 @@ struct SignupView: View {
         isLoading = true
         authService.signUp(email: email, password: password) { success in
             isLoading = false
-            
             if success {
-                // Successful signup
                 alertTitle = "Success!"
                 alertMessage = "Account created successfully."
                 isSignupSuccessful = true
                 showAlert = true
             } else {
-                // Handle errors
                 alertTitle = "Signup Failed"
                 alertMessage = authService.errorMessage ?? "Unknown error"
                 showAlert = true
             }
         }
     }
-    
 }
+
 
 #Preview {
     SignupView()

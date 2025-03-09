@@ -18,8 +18,9 @@ struct ContentView: View {
         NavigationStack { // Root navigation stack
             Group {
                 if authService.isAuthenticated {
-                    //TaskListView()
+                    TaskListView()
                     // In the future, this will show the task list when implemented
+                    /*
                     Text("Welcome! You are logged in.")
                         .font(.title)
                         .padding()
@@ -29,6 +30,7 @@ struct ContentView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .padding()
+                     */
                 } else {
                     LoginView()
                 }

@@ -6,13 +6,21 @@
 //
 
 import SwiftUI
+import Firebase
 
+/// Main application entry point
 @main
 struct TaskManagerApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    // MARK: - Properties
+    
+    /// Firebase delegate for initialization
+    @UIApplicationDelegateAdaptor(FirebaseAppDelegate.self) var appDelegate
+
+    /// Shared authentication service instance
+    @StateObject private var authService = AuthService.shared
+
+    // MARK: - Body
     var body: some Scene {
-        // Initialize AuthService and inject it globally
-        let authService = AuthService.shared
         WindowGroup {
             ContentView()
                 .environmentObject(authService) // ⚠️ Critical Fix Here

@@ -7,22 +7,22 @@
 
 import SwiftUI
 
+/// View for user login screen
 struct LoginView: View {
+    // MARK: - Properties
     @Environment(\.colorScheme) var colorScheme
-    @EnvironmentObject var authService: AuthService
-    @State private var email = ""
-    @State private var password = ""
-    @State private var emailErrorMessage = ""
-    @State private var passwordErrorMessage = ""
-    @State private var isLoading = false
-    @State private var showAlert = false
-    @State private var alertMessage = ""
+    @StateObject private var viewModel: LoginViewModel
     
+    /// Initializes the view with an authentication service
+    /// - Parameter authService: The service responsible for authentication operations
+    init(authService: AuthService = AuthService.shared) { 
+        _viewModel = StateObject(wrappedValue: LoginViewModel(authService: authService))
+    }
+    
+    // MARK: - Body
     var body: some View {
         ZStack {
-            // Background
-            Color("BackgroundColor")
-                .ignoresSafeArea()
+            Color("BackgroundColor").ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 30) {
@@ -42,86 +42,65 @@ struct LoginView: View {
                         CustomTextField(
                             title: "Email",
                             icon: "envelope",
-                            text: $email
+                            text: $viewModel.email
                         )
-                        .onChange(of: email) {
-                            emailErrorMessage = ""
+                        .onChange(of: viewModel.email) {
+                            viewModel.emailErrorMessage = ""
                         }
                         
-                        if !emailErrorMessage.isEmpty {
-                            ErrorMessage(text: emailErrorMessage)
+                        if !viewModel.emailErrorMessage.isEmpty {
+                            ErrorMessage(text: viewModel.emailErrorMessage)
                         }
                         
                         CustomTextField(
                             title: "Password",
                             icon: "lock",
-                            text: $password,
+                            text: $viewModel.password,
                             isSecure: true
                         )
-                        .onChange(of: password) {
-                            passwordErrorMessage = ""
+                        .onChange(of: viewModel.password) {
+                            viewModel.passwordErrorMessage = ""
                         }
                         
-                        if !passwordErrorMessage.isEmpty {
-                            ErrorMessage(text: passwordErrorMessage)
+                        if !viewModel.passwordErrorMessage.isEmpty {
+                            ErrorMessage(text: viewModel.passwordErrorMessage)
                         }
                     }
                     
                     // Login Button
                     CustomButton(
                         title: "Login",
-                        action: handleLogin,
-                        isLoading: isLoading
+                        action: viewModel.login,
+                        isLoading: viewModel.isLoading
                     )
                     
                     // Signup Link
                     HStack {
                         Text("Don't have an account?")
                             .foregroundColor(Color("TextSecondary"))
-                        
-                        NavigationLink("Sign Up") {
-                            SignupView()
-                        }
-                        .foregroundColor(Color("PrimaryColor"))
+
+                        NavigationLink("Sign Up", destination: SignupView())
+                            .foregroundColor(Color("PrimaryColor"))
                     }
                 }
                 .padding()
             }
             
-            // Alert
-            if showAlert {
+            if viewModel.showAlert {
                 Color.black.opacity(0.4).ignoresSafeArea()
                 CustomAlertView(
                     title: "Login Failed",
-                    message: alertMessage,
+                    message: viewModel.alertMessage,
                     primaryButtonTitle: "OK",
-                    primaryAction: { showAlert = false }
+                    primaryAction: { viewModel.showAlert = false }
                 )
             }
         }
         .navigationBarHidden(true)
     }
-    
-    private func handleLogin() {
-        validateForm()
-        guard emailErrorMessage.isEmpty && passwordErrorMessage.isEmpty else { return }
-        
-        isLoading = true
-        authService.signIn(email: email, password: password) { success in
-            isLoading = false
-            if !success {
-                alertMessage = authService.errorMessage ?? "Invalid email or password"
-                showAlert = true
-            }
-        }
-    }
-    
-    private func validateForm() {
-        emailErrorMessage = Validation.isFieldEmpty(email) ? "Email is required" : ""
-        passwordErrorMessage = Validation.isFieldEmpty(password) ? "Password is required" : ""
-    }
 }
 
+// Preview now works without needing to pass `authService`
 #Preview {
     LoginView()
 }

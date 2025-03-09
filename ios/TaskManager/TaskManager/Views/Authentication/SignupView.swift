@@ -11,21 +11,11 @@ struct SignupView: View {
     
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var authService: AuthService
-    @Environment(\.dismiss) var dismiss
-    @State private var email = ""
-    @State private var password = ""
-    @State private var reEnterPassword = ""
-    @State private var emailErrorMessage = ""
-    @State private var passwordErrorMessage = ""
-    @State private var reEnterPasswordErrorMessage = ""
-    @State private var isLoading = false // For loading state
-    @State private var showAlert = false
-    @State private var alertTitle = ""
-    @State private var alertMessage = ""
-    @State private var isSignupSuccessful = false // For navigation
+    @Environment(\.dismiss) var dismiss         // For navigation back
+    @StateObject private var viewModel = SignupViewModel() // Using ViewModel
     
     var body: some View {
-        NavigationView {
+        NavigationStack { // Add NavigationStack
             ZStack {
                 // Background
                 Color("BackgroundColor").ignoresSafeArea()
@@ -53,14 +43,14 @@ struct SignupView: View {
                                     CustomTextField(
                                         title: "Email",
                                         icon: "envelope",
-                                        text: $email
+                                        text: $viewModel.email
                                     )
                                     .textInputAutocapitalization(.never)
-                                    .onChange(of: email) {
-                                        emailErrorMessage = ""
+                                    .onChange(of: viewModel.email) {
+                                        viewModel.emailErrorMessage = ""
                                     }
-                                    if !emailErrorMessage.isEmpty {
-                                        ErrorMessage(text: emailErrorMessage)
+                                    if !viewModel.emailErrorMessage.isEmpty {
+                                        ErrorMessage(text: viewModel.emailErrorMessage)
                                     }
                                 }
                                 
@@ -69,16 +59,16 @@ struct SignupView: View {
                                     CustomTextField(
                                         title: "Password",
                                         icon: "lock",
-                                        text: $password,
+                                        text: $viewModel.password,
                                         isSecure: true
                                     )
-                                    .onChange(of: password) {
-                                        passwordErrorMessage = ""
-                                        validateReEnterPassword()
+                                    .onChange(of: viewModel.password) {
+                                        viewModel.passwordErrorMessage = ""
+                                        viewModel.validateReEnterPassword()
                                     }
                                     
-                                    if !passwordErrorMessage.isEmpty {
-                                        ErrorMessage(text: passwordErrorMessage)
+                                    if !viewModel.passwordErrorMessage.isEmpty {
+                                        ErrorMessage(text: viewModel.passwordErrorMessage)
                                     }
                                 }
                                 
@@ -87,24 +77,24 @@ struct SignupView: View {
                                     CustomTextField(
                                         title: "Re-Enter Password",
                                         icon: "lock.fill",
-                                        text: $reEnterPassword,
+                                        text: $viewModel.reEnterPassword,
                                         isSecure: true
                                     )
-                                    .onChange(of: password) {
-                                        validateReEnterPassword()
+                                    .onChange(of: viewModel.password) {
+                                        viewModel.validateReEnterPassword()
                                     }
-                                    if !reEnterPasswordErrorMessage.isEmpty {
-                                        ErrorMessage(text: reEnterPasswordErrorMessage)
+                                    if !viewModel.reEnterPasswordErrorMessage.isEmpty {
+                                        ErrorMessage(text: viewModel.reEnterPasswordErrorMessage)
                                     }
                                 }
                                 
                                 // Sign Up Button
                                 CustomButton(
                                     title: "Sign Up",
-                                    action: handleSignup,
-                                    isLoading: isLoading
+                                    action: viewModel.handleSignup,
+                                    isLoading: viewModel.isLoading
                                 )
-                                .disabled(isLoading)
+                                .disabled(viewModel.isLoading)
                                 
                                 // Login Link
                                 HStack {
@@ -125,24 +115,24 @@ struct SignupView: View {
                 }
                 
                 // Alert Overlay
-                if showAlert {
+                if viewModel.showAlert {
                     Color.black.opacity(0.4).ignoresSafeArea()
                     CustomAlertView(
-                        title: alertTitle,
-                        message: alertMessage,
+                        title: viewModel.alertTitle,
+                        message: viewModel.alertMessage,
                         primaryButtonTitle: "OK",
                         primaryAction: {
-                            if isSignupSuccessful {
+                            if viewModel.isSignupSuccessful {
                                 dismiss()
                             }
-                            showAlert = false
+                            viewModel.showAlert = false
                         }
                     )
                     .transition(.scale)
                 }
 
                 // Loading Overlay
-                if isLoading {
+                if viewModel.isLoading {
                     VStack {
                         ProgressView()
                             .scaleEffect(2)
@@ -159,54 +149,10 @@ struct SignupView: View {
     }
     
     // MARK: - Validation
-    private func validateForm() {
-        if Validation.isFieldEmpty(email) {
-            emailErrorMessage = "Email is required"
-        } else if !Validation.isValidEmail(email) {
-            emailErrorMessage = "Invalid email format"
-        }
-        
-        if Validation.isFieldEmpty(password) {
-            passwordErrorMessage = "Password is required"
-        } else if !Validation.isValidPassword(password) {
-            passwordErrorMessage = "Invalid password format"
-        }
-        
-        validateReEnterPassword()
-    }
+    // Removed validation functions as they are now in the view model
     
-    private func validateReEnterPassword() {
-        if reEnterPassword != password && !reEnterPassword.isEmpty {
-            reEnterPasswordErrorMessage = "Passwords do not match"
-        } else {
-            reEnterPasswordErrorMessage = ""
-        }
-    }
-    
-    private func handleSignup() {
-        validateForm()
-        guard emailErrorMessage.isEmpty,
-              passwordErrorMessage.isEmpty,
-              reEnterPasswordErrorMessage.isEmpty
-        else { return }
-        
-        isLoading = true
-        authService.signUp(email: email, password: password) { success in
-            isLoading = false
-            if success {
-                alertTitle = "Success!"
-                alertMessage = "Account created successfully."
-                isSignupSuccessful = true
-                showAlert = true
-            } else {
-                alertTitle = "Signup Failed"
-                alertMessage = authService.errorMessage ?? "Unknown error"
-                showAlert = true
-            }
-        }
-    }
+    // Removed handleSignup function as it is now in the view model
 }
-
 
 #Preview {
     SignupView()

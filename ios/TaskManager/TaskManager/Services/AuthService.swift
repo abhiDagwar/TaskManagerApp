@@ -6,20 +6,32 @@
 //
 
 import Foundation
-import FirebaseAuth // Import Firebase Authentication for handling user authentication
-import Combine // Import Combine framework to handle reactive programming
+import FirebaseAuth 
+import Combine 
 
-// AuthService is responsible for managing user authentication in the app.
+/// Service responsible for managing user authentication in the app
 class AuthService: ObservableObject {
     // `isAuthenticated` is a published property that notifies views when the authentication status changes.
     @Published var isAuthenticated: Bool = false
     // `errorMessage` is used to store authentication-related error messages.
     @Published var errorMessage: String?
     
+    // MARK: - Published Properties
+    
+    /// Indicates whether a user is currently authenticated
+    // Removed
+    
+    /// Stores the most recent authentication error message
+    // Removed
+    
     // Singleton instance of AuthService to ensure only one instance exists throughout the app.
+    /// Shared instance to ensure only one AuthService exists throughout the app
     static let shared = AuthService()
     
     // Private initializer prevents other instances from being created outside this class.
+    // MARK: - Initialization
+    
+    /// Private initializer prevents other instances from being created
     private init() {
         // Firebase listener to track authentication state changes.
         Auth.auth().addStateDidChangeListener { [weak self] _, user in
@@ -30,11 +42,11 @@ class AuthService: ObservableObject {
     
     // MARK: - User Authentication Methods
 
-      /// Sign Up with Email and Password
-      /// - Parameters:
-      ///   - email: The email address of the user
-      ///   - password: The password chosen by the user
-      ///   - completion: A closure that returns `true` if successful, otherwise `false`
+    /// Sign Up with Email and Password
+    /// - Parameters:
+    ///   - email: The email address of the user
+    ///   - password: The password chosen by the user
+    ///   - completion: A closure that returns `true` if successful, otherwise `false`
     func signUp(email: String, password: String, completion: @escaping (Bool) -> Void) {
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
             if let error = error {
@@ -58,10 +70,10 @@ class AuthService: ObservableObject {
     }
     
     /// Sign In with Email and Password
-      /// - Parameters:
-      ///   - email: The user's email address
-      ///   - password: The user's password
-      ///   - completion: A closure that returns `true` if login is successful, otherwise `false`
+    /// - Parameters:
+    ///   - email: The user's email address
+    ///   - password: The user's password
+    ///   - completion: A closure that returns `true` if login is successful, otherwise `false`
     func signIn(email: String, password: String, completion: @escaping (Bool) -> Void) {
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
             if let error = error {

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 /// Service responsible for handling API requests and responses
 class APIService {
@@ -27,6 +28,23 @@ class APIService {
     
     // MARK: - API Methods
     
+    // DECODE THE DATA INTO JSON USING JSON SERILISER FOR TESTING
+    fileprivate func jsonExtractor(_ data: Data) {
+        let jsonData = data
+        do {
+            let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options:JSONSerialization.ReadingOptions(rawValue: 0))
+            guard let dictionary = jsonObject as? Dictionary<String, Any> else {
+                print("Not a Dictionary")
+                // put in function
+                return
+            }
+            print("JSON Dictionary! \(dictionary)")
+        }
+        catch let error as NSError {
+            print("Found an error - \(error)")
+        }
+    }
+    
     /// Fetches tasks for a specific user
     /// - Parameters:
     ///   - userId: The ID of the user whose tasks to fetch
@@ -42,7 +60,7 @@ class APIService {
             return
         }
         
-        let task = session.dataTask(with: requestUrl) { data, response, error in
+        let task = session.dataTask(with: requestUrl) { [self] data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
@@ -54,9 +72,13 @@ class APIService {
             }
             
             do {
-                let tasks = try JSONDecoder().decode([Task].self, from: data)
+                // Decode the JSON data into an array of Task objects using the Task struct's CodingKeys
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .millisecondsSince1970 // Ensure this matches Firestore timestamp format
+                let tasks = try decoder.decode([Task].self, from: data)
                 completion(.success(tasks))
             } catch {
+                print("Error decoding tasks:", error)
                 completion(.failure(error))
             }
         }
@@ -68,16 +90,50 @@ class APIService {
     /// - Parameters:
     ///   - task: The task to create
     ///   - completion: Closure called with the result containing created task or error
-    func createTask(_ task: Task, completion: @escaping (Result<Task, Error>) -> Void) {
-        // This would typically make a network request to create a task
-        // For now, it's a placeholder for future implementation
+    func createTask(for userId: String, _ task: Task, completion: @escaping (Result<Task, Error>) -> Void) {
+        // Construct URL with user ID in the path
+        let endpoint = "\(baseURL)/tasks/\(userId)"
         
-        // Simulate network delay
-        DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
-            // Return the same task but with a generated ID
-            var createdTask = task
-            createdTask.id = UUID().uuidString
-            completion(.success(createdTask))
+        guard let url = URL(string: endpoint) else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {            
+            let jsonData = try? JSONEncoder().encode(task)
+            request.httpBody = jsonData
+            
+            let task = session.dataTask(with: request) { [weak self] data, response, error in
+                // Handle response
+                guard let self = self else { return }
+                
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                
+                guard let data = data else {
+                    completion(.failure(APIError.noData))
+                    return
+                }
+                
+                do {
+                    let createdTask = try? JSONDecoder().decode(Task.self, from: data)
+                    completion(.success(createdTask!))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+            task.resume()
+            
+            
+        } catch {
+            completion(.failure(error))
+            return
         }
     }
     

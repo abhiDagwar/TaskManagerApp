@@ -73,14 +73,24 @@ class TaskViewModel: ObservableObject {
     /// Adds a new task
     /// - Parameter task: The task to be added
     func addTask(_ task: Task) {
-        // This would call an API to add the task
-        // For now, just add to local array
+        guard let userId = authService.userId else {
+            self.errorMessage = "User not authenticated"
+            return
+        }
         isLoading = true
+        self.errorMessage = nil
         
-        // Simulate API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.isLoading = false
-            self.tasks.append(task)
+        // Implement API call
+        apiService.createTask(for: userId, task) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                switch result {
+                case .success(let newTask):
+                    self?.tasks.insert(newTask, at: 0)
+                case .failure(let error):
+                    self?.errorMessage = error.localizedDescription
+                }
+            }
         }
     }
     

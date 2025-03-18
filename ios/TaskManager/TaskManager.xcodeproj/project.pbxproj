@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4018D5C52D633BD900212D46 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 4018D5C42D633BD900212D46 /* Alamofire */; };
 		4018D5CA2D633BF000212D46 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4018D5C92D633BF000212D46 /* FirebaseAuth */; };
+		4043FD342D898A2C00E884DE /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 4043FD332D898A2C00E884DE /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 			files = (
 				4018D5C52D633BD900212D46 /* Alamofire in Frameworks */,
 				4018D5CA2D633BF000212D46 /* FirebaseAuth in Frameworks */,
+				4043FD342D898A2C00E884DE /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,6 +131,7 @@
 			packageProductDependencies = (
 				4018D5C42D633BD900212D46 /* Alamofire */,
 				4018D5C92D633BF000212D46 /* FirebaseAuth */,
+				4043FD332D898A2C00E884DE /* FirebaseFirestore */,
 			);
 			productName = TaskManager;
 			productReference = 4089324C2D5E0CA20059563E /* TaskManager.app */;
@@ -607,6 +610,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4018D5C22D633BC800212D46 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		4043FD332D898A2C00E884DE /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4018D5C22D633BC800212D46 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

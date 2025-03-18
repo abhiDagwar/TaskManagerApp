@@ -118,13 +118,14 @@ struct TaskFormView: View {
     }
     
     private func addTask() {
-        // TODO: Implemente the add task
+        
         /*
-        let newTask = Task(title: title, description: description, dueDate: dueDate, status: status, userId: authService.currentUserId)
-        viewModel.addTask(task: newTask) { success in
-            handleResult(success: success, successMessage: "Task added successfully")
-        }
+        let newTask = Task(id: nil, title: title, description: description,
+                           createdAt: Date(),dueDate: dueDate, status: status)
+        
+        viewModel.addTask(newTask)
          */
+        
     }
     
     private func updateTask(_ task: Task) {

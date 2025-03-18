@@ -67,8 +67,10 @@ struct TaskListView: View {
             }
         }
         .sheet(isPresented: $showingAddTask) {
-            Text("Add Task Form Will Go Here")
+            // Text("Add Task Form Will Go Here")
             // This would be a TaskFormView in the future
+            // Test to show TaskFormView
+            TaskFormView(viewModel: TaskViewModel(), showAlert: .constant(false), alertMessage: .constant(""))
         }
         .onAppear {
             viewModel.fetchTasks()

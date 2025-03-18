@@ -47,18 +47,26 @@ class TaskViewModel: ObservableObject {
         // For now, it's a placeholder for future implementation
         isLoading = true
         
-        // Simulate API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.isLoading = false
-            // Sample data - would be replaced with actual API call
-            self.tasks = [
-                Task(id: "1", title: "Complete MVVM Implementation", 
-                     description: "Implement MVVM architecture in TaskManager app", 
-                     dueDate: Date(), status: "In Progress", userId: "currentUser"),
-                Task(id: "2", title: "Add Task List View", 
-                     description: "Create a view to display all user tasks", 
-                     dueDate: Date().addingTimeInterval(86400), status: "Todo", userId: "currentUser")
-            ]
+        // Implement API call
+        
+        // 1. Get the userId
+        guard let userId = authService.userId else {
+            print("User not autheticated")
+            return
+        }
+        
+        // 2. Call fetch task api service
+        apiService.fetchTasks(for: userId) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let task):
+                    self?.tasks = task
+                case .failure(let error):
+                    self?.errorMessage = error.localizedDescription
+                    print("Error fetching tasks: \(error.localizedDescription)")
+                }
+                self?.isLoading = false
+            }
         }
     }
     

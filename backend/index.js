@@ -11,12 +11,25 @@ admin.initializeApp({
 
 const db = admin.firestore();
 const app = express();
-app.use(cors());
+// app.js
+app.use(cors({
+    origin: 'http://localhost:8080', // Your iOS app's origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Health Check Endpoint
 app.get('/', (req, res) => {
   res.send('Task Manager API is running!');
+});
+
+// Validate MongoDB ID format
+app.param('id', (req, res, next, id) => {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid task ID" });
+    }
+    next();
 });
 
 // Fetch All Tasks for a User
@@ -58,17 +71,23 @@ app.put('/:id', async (req, res) => {
     try {
         const updatedTask = await Task.findByIdAndUpdate(
             req.params.id,
-            req.body,
-            { new: true } // Return updated document
+            {
+                title: req.body.title,
+                description: req.body.description,
+                dueDate: new Date(req.body.dueDate),
+                status: req.body.status,
+                userId: req.body.userId
+            },
+            { new: true, runValidators: true }
         );
-        
+
         if (!updatedTask) {
-            return res.status(404).json({ message: 'Task not found' });
+            return res.status(404).json({ error: "Task not found" });
         }
-        
+
         res.json(updatedTask);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
 });
 

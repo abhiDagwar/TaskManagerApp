@@ -53,6 +53,25 @@ app.post('/tasks/:userId', async (req, res) => {
   }
 });
 
+// PUT /tasks/:id
+router.put('/:id', async (req, res) => {
+    try {
+        const updatedTask = await Task.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true } // Return updated document
+        );
+        
+        if (!updatedTask) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+        
+        res.json(updatedTask);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

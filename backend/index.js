@@ -54,7 +54,7 @@ app.post('/tasks/:userId', async (req, res) => {
 });
 
 // PUT /tasks/:id
-router.put('/:id', async (req, res) => {
+app.put('/:id', async (req, res) => {
     try {
         const updatedTask = await Task.findByIdAndUpdate(
             req.params.id,

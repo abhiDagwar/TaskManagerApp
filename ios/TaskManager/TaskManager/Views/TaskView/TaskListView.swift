@@ -12,6 +12,7 @@ struct TaskListView: View {
     // MARK: - Properties
     @EnvironmentObject var viewModel: TaskViewModel
     @State private var showingAddTask = false
+    @State private var selectedTask: Task? // ✅ Track selected task
     
     // MARK: - Body
     var body: some View {
@@ -41,6 +42,11 @@ struct TaskListView: View {
                 List {
                     ForEach(viewModel.tasks) { task in
                         TaskRow(task: task)
+                            .onTapGesture { // ✅ Open TaskFormView for editing
+                                                            selectedTask = task
+                                showingAddTask = true
+                                print("Tapped task")
+                                                        }
                             .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
                                     if let id = task.id {
@@ -70,7 +76,8 @@ struct TaskListView: View {
             // Text("Add Task Form Will Go Here")
             // This would be a TaskFormView in the future
             // Test to show TaskFormView
-            TaskFormView(showAlert: .constant(false), alertMessage: .constant(""))
+            TaskFormView(task: selectedTask, showAlert: .constant(false),
+                         alertMessage: .constant(""))
                             .environmentObject(viewModel) // ✅ Correct way to pass it
         }
         .onAppear {

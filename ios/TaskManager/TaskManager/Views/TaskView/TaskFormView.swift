@@ -11,8 +11,10 @@ struct TaskFormView: View {
     // MARK: - Properties
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var viewModel: TaskViewModel // ✅ Correct way to access shared ViewModel
+    
     @Binding var showAlert: Bool
     @Binding var alertMessage: String
+    
     @State private var title = ""
     @State private var description = ""
     @State private var dueDate = Date()
@@ -22,6 +24,19 @@ struct TaskFormView: View {
     private let authService = AuthService.shared
     var task: Task?
     
+    // ✅ Custom Initializer that correctly handles @Binding properties
+        init(task: Task? = nil, showAlert: Binding<Bool>, alertMessage: Binding<String>) {
+            self.task = task
+            self._showAlert = showAlert
+            self._alertMessage = alertMessage
+            
+            // ✅ Properly initializing @State variables
+            _title = State(initialValue: task?.title ?? "")
+            _description = State(initialValue: task?.description ?? "")
+            _dueDate = State(initialValue: task?.dueDate ?? Date())
+            _status = State(initialValue: task?.status ?? "Todo")
+        }
+
     // MARK: - Body
     var body: some View {
         NavigationStack {
@@ -127,15 +142,7 @@ struct TaskFormView: View {
             dueDate: dueDate, // Due date
             status: status
         )
-        
-//        Task(
-//                    title: title,
-//                    description: description,
-//                    dueDate: dueDate,
-//                    status: status,
-//                    userId: authService.currentUserId
-//                )
-                
+                        
         viewModel.addTask(newTask) { success in
                     handleResult(success: success, successMessage: "Task added successfully")
                 }
@@ -186,7 +193,9 @@ struct InputField: View {
 }
 
 #Preview {
-    TaskFormView(showAlert: .constant(false), alertMessage: .constant(""))
-        .environmentObject(TaskViewModel()) // ✅ Create a new instance for preview
+    TaskFormView(task: Task(title: "New Task", description: "Preview task", createdAt: Date(), dueDate: Date(), status: "Pending"),
+                     showAlert: .constant(false),
+                     alertMessage: .constant(""))
+            .environmentObject(TaskViewModel()) // ✅ Create a new instance for preview
 }
 

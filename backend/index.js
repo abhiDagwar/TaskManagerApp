@@ -67,25 +67,27 @@ app.post('/tasks/:userId', async (req, res) => {
 });
 
 // PUT /tasks/:id
-app.put('/:id', async (req, res) => {
+// Update an Existing Task
+app.put('/tasks/:userId/:taskId', async (req, res) => {
     try {
-        const updatedTask = await Task.findByIdAndUpdate(
-            req.params.id,
-            {
-                title: req.body.title,
-                description: req.body.description,
-                dueDate: new Date(req.body.dueDate),
-                status: req.body.status,
-                userId: req.body.userId
-            },
-            { new: true, runValidators: true }
-        );
+        const { userId, taskId } = req.params;
+        const { title, description, dueDate, status } = req.body;
 
-        if (!updatedTask) {
+        const taskRef = db.collection('users').doc(userId).collection('tasks').doc(taskId);
+
+        const taskSnapshot = await taskRef.get();
+        if (!taskSnapshot.exists) {
             return res.status(404).json({ error: "Task not found" });
         }
 
-        res.json(updatedTask);
+        await taskRef.update({
+            title,
+            description,
+            dueDate: new Date(dueDate),
+            status
+        });
+
+        res.json({ id: taskId, message: "Task updated successfully" });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }

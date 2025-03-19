@@ -103,7 +103,9 @@ class APIService {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         do {
-            let jsonData = try JSONEncoder().encode(task)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601 // Add a fix to update date format to the server
+            let jsonData = try encoder.encode(task)
             request.httpBody = jsonData
         } catch {
             completion(.failure(error))
@@ -153,13 +155,22 @@ class APIService {
     ///   - task: The task with updated values
     ///   - completion: Closure called with the result containing updated task or error
     func updateTask(_ task: Task, completion: @escaping (Result<Task, Error>) -> Void) {
-        // This would typically make a network request to update a task
-        // For now, it's a placeholder for future implementation
-        
-        // Simulate network delay
-        DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
-            completion(.success(task))
-        }
+        // Ensure the task has an ID
+            guard let taskId = task.id else {
+                completion(.failure(APIError.invalidRequest))
+                return
+            }
+            
+            // Construct URL with task ID
+            let endpoint = "\(baseURL)/tasks/\(taskId)"
+            guard let url = URL(string: endpoint) else {
+                completion(.failure(APIError.invalidURL))
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "PUT"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     }
     
     /// Deletes a task
@@ -183,4 +194,5 @@ enum APIError: Error {
     case noData
     case decodingError
     case invalidResponse
+    case invalidRequest
 }

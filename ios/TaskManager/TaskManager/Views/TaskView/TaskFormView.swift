@@ -150,13 +150,11 @@ struct TaskFormView: View {
     }
     
     private func updateTask(_ task: Task) {
-        // TODO: Implemete the updateTask
-        /*
-        let updatedTask = Task(id: task.id, title: title, description: description, dueDate: dueDate, status: status, userId: authService.currentUserId)
-        viewModel.updateTask(task: updatedTask) { success in
+        
+        let updatedTask = Task(id: task.id, title: title, description: description, createdAt: Date(), dueDate: dueDate, status: status)
+        viewModel.updateTask(updatedTask) { success in
             handleResult(success: success, successMessage: "Task updated successfully")
         }
-         */
     }
     
     private func handleResult(success: Bool, successMessage: String) {

@@ -98,16 +98,29 @@ class TaskViewModel: ObservableObject {
     
     /// Updates an existing task
     /// - Parameter task: The task with updated values
-    func updateTask(_ task: Task) {
-        // This would call an API to update the task
-        // For now, just update local array
+    func updateTask(_ task: Task, completion: @escaping (Bool) -> Void) {
         isLoading = true
+        errorMessage = nil
         
-        // Simulate API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.isLoading = false
-            if let index = self.tasks.firstIndex(where: { $0.id == task.id }) {
-                self.tasks[index] = task
+        guard let userId = authService.userId else {
+            self.errorMessage = "User not authenticated"
+            return
+        }
+        
+        apiService.updateTask(for: userId, task: task) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                switch result {
+                case .success(let updatedTask):
+                    // Replace the old task with updated version
+                    if let index = self?.tasks.firstIndex(where: { $0.id == updatedTask.id }) {
+                        self?.tasks[index] = updatedTask
+                    }
+                    completion(true)
+                case .failure(let error):
+                    self?.errorMessage = error.localizedDescription
+                    completion(false)
+                }
             }
         }
     }

@@ -154,23 +154,70 @@ class APIService {
     /// - Parameters:
     ///   - task: The task with updated values
     ///   - completion: Closure called with the result containing updated task or error
-    func updateTask(_ task: Task, completion: @escaping (Result<Task, Error>) -> Void) {
+    func updateTask(for userId: String, task: Task, completion: @escaping (Result<Task, Error>) -> Void) {
         // Ensure the task has an ID
-            guard let taskId = task.id else {
-                completion(.failure(APIError.invalidRequest))
+        guard let taskId = task.id else {
+            completion(.failure(APIError.invalidRequest))
+            return
+        }
+        
+        // Construct URL with task ID
+        let endpoint = "\(baseURL)/tasks/\(userId)/\(taskId)"
+        guard let url = URL(string: endpoint) else {
+            completion(.failure(APIError.invalidURL))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        do {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601 // Add a fix to update date format to the server
+            let jsonData = try encoder.encode(task)
+            request.httpBody = jsonData
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        let task = session.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
                 return
             }
             
-            // Construct URL with task ID
-            let endpoint = "\(baseURL)/tasks/\(taskId)"
-            guard let url = URL(string: endpoint) else {
-                completion(.failure(APIError.invalidURL))
+            guard let data = data else {
+                completion(.failure(APIError.noData))
                 return
             }
             
-            var request = URLRequest(url: url)
-            request.httpMethod = "PUT"
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            do {
+                // Decode response as a dictionary
+                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
+                   let taskId = jsonResponse["id"] {
+                    
+                    // Construct a new Task object with the returned ID
+                    let createdTask = Task(
+                        id: taskId,
+                        title: task.title,
+                        description: task.description,
+                        createdAt: task.createdAt,
+                        dueDate: task.dueDate,
+                        status: task.status
+                    )
+                    
+                    completion(.success(createdTask))
+                } else {
+                    completion(.failure(APIError.invalidResponse))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        
+        task.resume()
     }
     
     /// Deletes a task

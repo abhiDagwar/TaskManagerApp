@@ -72,7 +72,7 @@ class TaskViewModel: ObservableObject {
     
     /// Adds a new task
     /// - Parameter task: The task to be added
-    func addTask(_ task: Task) {
+    func addTask(_ task: Task, completion: @escaping (Bool) -> Void) {
         guard let userId = authService.userId else {
             self.errorMessage = "User not authenticated"
             return
@@ -87,8 +87,10 @@ class TaskViewModel: ObservableObject {
                 switch result {
                 case .success(let newTask):
                     self?.tasks.insert(newTask, at: 0)
+                    completion(true)
                 case .failure(let error):
                     self?.errorMessage = error.localizedDescription
+                    completion(false)
                 }
             }
         }

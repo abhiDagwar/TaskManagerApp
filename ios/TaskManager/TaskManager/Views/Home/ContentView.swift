@@ -11,7 +11,6 @@ import SwiftUI
 struct ContentView: View {
     // MARK: - Properties
     @EnvironmentObject var authService: AuthService
-    @StateObject private var viewModel = ContentViewModel()
     
     // MARK: - Body
     var body: some View {
@@ -37,7 +36,7 @@ struct ContentView: View {
             }
             .transition(.opacity) // Optional animation
         }
-        .environmentObject(AuthService.shared) // Required
+        .environmentObject(AuthService.shared) // Required to inject AuthService into the environment
     }
 }
 

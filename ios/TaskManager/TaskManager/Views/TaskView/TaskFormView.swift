@@ -10,7 +10,7 @@ import SwiftUI
 struct TaskFormView: View {
     // MARK: - Properties
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var viewModel: TaskViewModel
+    @EnvironmentObject var viewModel: TaskViewModel // ✅ Correct way to access shared ViewModel
     @Binding var showAlert: Bool
     @Binding var alertMessage: String
     @State private var title = ""
@@ -119,12 +119,26 @@ struct TaskFormView: View {
     
     private func addTask() {
         
-        /*
-        let newTask = Task(id: nil, title: title, description: description,
-                           createdAt: Date(),dueDate: dueDate, status: status)
+        let newTask = Task(
+            id: nil, // Firestore will generate the ID
+            title: title,
+            description: description,
+            createdAt: Date(),
+            dueDate: dueDate, // Due date
+            status: status
+        )
         
-        viewModel.addTask(newTask)
-         */
+//        Task(
+//                    title: title,
+//                    description: description,
+//                    dueDate: dueDate,
+//                    status: status,
+//                    userId: authService.currentUserId
+//                )
+                
+        viewModel.addTask(newTask) { success in
+                    handleResult(success: success, successMessage: "Task added successfully")
+                }
         
     }
     
@@ -139,13 +153,10 @@ struct TaskFormView: View {
     }
     
     private func handleResult(success: Bool, successMessage: String) {
-        // TODO: Handle the result
-        /*
-        DispatchQueue.main.async {
-            alertMessage = success ? successMessage : (viewModel.error ?? "Operation failed")
+
+        alertMessage = success ? successMessage : (viewModel.errorMessage ?? "Failed to save task.")
             showAlert = true
-        }
-         */
+        
     }
 }
 
@@ -175,5 +186,7 @@ struct InputField: View {
 }
 
 #Preview {
-    TaskFormView(viewModel: TaskViewModel(), showAlert: .constant(false), alertMessage: .constant(""))
+    TaskFormView(showAlert: .constant(false), alertMessage: .constant(""))
+        .environmentObject(TaskViewModel()) // ✅ Create a new instance for preview
 }
+

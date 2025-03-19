@@ -18,12 +18,15 @@ struct TaskManagerApp: App {
 
     /// Shared authentication service instance
     @StateObject private var authService = AuthService.shared
+    
+    @StateObject private var viewModel = TaskViewModel()
 
     // MARK: - Body
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(authService) // ⚠️ Critical Fix Here
+                .environmentObject(viewModel)
         }
     }
 }

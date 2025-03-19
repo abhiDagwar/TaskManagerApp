@@ -60,7 +60,7 @@ class APIService {
             return
         }
         
-        let task = session.dataTask(with: requestUrl) { [self] data, response, error in
+        let task = session.dataTask(with: requestUrl) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
@@ -91,7 +91,6 @@ class APIService {
     ///   - task: The task to create
     ///   - completion: Closure called with the result containing created task or error
     func createTask(for userId: String, _ task: Task, completion: @escaping (Result<Task, Error>) -> Void) {
-        // Construct URL with user ID in the path
         let endpoint = "\(baseURL)/tasks/\(userId)"
         
         guard let url = URL(string: endpoint) else {
@@ -103,38 +102,50 @@ class APIService {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        do {            
-            let jsonData = try? JSONEncoder().encode(task)
+        do {
+            let jsonData = try JSONEncoder().encode(task)
             request.httpBody = jsonData
-            
-            let task = session.dataTask(with: request) { [weak self] data, response, error in
-                // Handle response
-                guard let self = self else { return }
-                
-                if let error = error {
-                    completion(.failure(error))
-                    return
-                }
-                
-                guard let data = data else {
-                    completion(.failure(APIError.noData))
-                    return
-                }
-                
-                do {
-                    let createdTask = try? JSONDecoder().decode(Task.self, from: data)
-                    completion(.success(createdTask!))
-                } catch {
-                    completion(.failure(error))
-                }
-            }
-            task.resume()
-            
-            
         } catch {
             completion(.failure(error))
             return
         }
+        
+        let task = session.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(APIError.noData))
+                return
+            }
+            
+            do {
+                // Decode response as a dictionary
+                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
+                   let taskId = jsonResponse["id"] {
+                    
+                    // Construct a new Task object with the returned ID
+                    let createdTask = Task(
+                        id: taskId,
+                        title: task.title,
+                        description: task.description,
+                        createdAt: task.createdAt,
+                        dueDate: task.dueDate,
+                        status: task.status
+                    )
+                    
+                    completion(.success(createdTask))
+                } else {
+                    completion(.failure(APIError.invalidResponse))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        
+        task.resume()
     }
     
     /// Updates an existing task
@@ -171,4 +182,5 @@ enum APIError: Error {
     case invalidURL
     case noData
     case decodingError
+    case invalidResponse
 }

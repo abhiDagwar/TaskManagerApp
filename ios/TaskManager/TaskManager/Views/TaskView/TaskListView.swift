@@ -10,7 +10,7 @@ import SwiftUI
 /// View displaying the list of tasks for the current user
 struct TaskListView: View {
     // MARK: - Properties
-    @StateObject private var viewModel = TaskViewModel()
+    @EnvironmentObject var viewModel: TaskViewModel
     @State private var showingAddTask = false
     
     // MARK: - Body
@@ -70,7 +70,8 @@ struct TaskListView: View {
             // Text("Add Task Form Will Go Here")
             // This would be a TaskFormView in the future
             // Test to show TaskFormView
-            TaskFormView(viewModel: TaskViewModel(), showAlert: .constant(false), alertMessage: .constant(""))
+            TaskFormView(showAlert: .constant(false), alertMessage: .constant(""))
+                            .environmentObject(viewModel) // ✅ Correct way to pass it
         }
         .onAppear {
             viewModel.fetchTasks()
